@@ -2,11 +2,12 @@
 #include <iomanip>
 
 #include "crypto.h"
+#include "vault.h"
 
-int main(int argc, char **argv)
+int main()
 {
-    auto t = CryptedVault::CryptoUtils::MD5("test");
-    for (auto a: t)
+    auto t = CryptedVault::CryptoUtils::MD5("");
+    for (auto const &a: t)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)a << " ";
 
     std::cout << std::endl;
@@ -16,15 +17,17 @@ int main(int argc, char **argv)
     auto dataD = CryptedVault::CryptoUtils::DecryptAES256(dataE, "MyPassword123@~%$!!");
 
     std::cout << "original:\t";
-    for (uint8_t byteI: input)
+    for (auto const &byteI: input)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteI << " ";
     std::cout << std::endl << "encrypted:\t";
-    for (uint8_t byteE: dataE)
+    for (auto const &byteE: dataE)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteE << " ";
     std::cout << std::endl << "decrypted:\t";
-    for (uint8_t byteD: dataD)
+    for (auto const &byteD: dataD)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteD << " ";
     std::cout << std::endl;
+
+    auto xxx = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo");
 
     return 0;
 }
