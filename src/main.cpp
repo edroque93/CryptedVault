@@ -6,7 +6,7 @@
 int main(int argc, char **argv)
 {
     auto t = CryptedVault::CryptoUtils::MD5("test");
-    for (auto a : t)
+    for (auto a: t)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)a << " ";
 
     std::cout << std::endl;
@@ -16,15 +16,13 @@ int main(int argc, char **argv)
     auto dataD = CryptedVault::CryptoUtils::DecryptAES256(dataE, "MyPassword123@~%$!!");
 
     std::cout << "original:\t";
-    for (uint8_t byteI : input)
+    for (uint8_t byteI: input)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteI << " ";
-    std::cout << std::endl
-              << "encrypted:\t";
-    for (uint8_t byteE : dataE)
+    std::cout << std::endl << "encrypted:\t";
+    for (uint8_t byteE: dataE)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteE << " ";
-    std::cout << std::endl
-              << "decrypted:\t";
-    for (uint8_t byteD : dataD)
+    std::cout << std::endl << "decrypted:\t";
+    for (uint8_t byteD: dataD)
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteD << " ";
     std::cout << std::endl;
 

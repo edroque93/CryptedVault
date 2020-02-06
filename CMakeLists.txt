@@ -9,7 +9,7 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(CMAKE_VERBOSE_MAKEFILE True)
 endif() 
 
-set(SOURCE src/main.cpp src/crypto.cpp)
+set(SOURCE src/main.cpp src/crypto.cpp src/vault.cpp)
 
 add_executable(${PROJECT_NAME} ${SOURCE})
 
