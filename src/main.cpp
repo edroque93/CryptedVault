@@ -5,9 +5,15 @@
 
 int main(int argc, char **argv)
 {
-    std::vector<uint8_t> input = {'h', 'e', 'l', 'l', 'o', ' ', 'w', 'o', 'r', 'l', 'd', '!'};
-    auto dataE = CryptedVault::CryptoUtils::EncryptAES256(input, "tester@jaj_a!");
-    auto dataD = CryptedVault::CryptoUtils::DecryptAES256(dataE, "tester@jaj_a!");
+    auto t = CryptedVault::CryptoUtils::MD5("test");
+    for (auto a: t)
+        std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)a << " ";
+
+    std::cout << std::endl;
+    std::string message = "¡Hola mundo!";
+    std::vector<uint8_t> input(message.begin(), message.end());
+    auto dataE = CryptedVault::CryptoUtils::EncryptAES256(input, "MyPassword123@~%$!!");
+    auto dataD = CryptedVault::CryptoUtils::DecryptAES256(dataE, "MyPassword123@~%$!!");
 
     std::cout << "original:\t";
     for (uint8_t byteI: input)
