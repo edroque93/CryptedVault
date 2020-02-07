@@ -4,7 +4,7 @@ namespace CryptedVault::Vault
 {
     namespace
     {
-        size_t writeDataMemberHelper(std::vector<uint8_t> &data, std::string &member, size_t offset)
+        size_t writeDataMemberHelper(std::vector<uint8_t> &data, std::string_view member, size_t offset)
         {
             data.resize(data.size() + sizeof(size_t) + member.length());
             auto ptrBase = data.data();
@@ -17,37 +17,49 @@ namespace CryptedVault::Vault
             return (ptr - ptrBase);
         }
 
-        std::vector<uint8_t> dumpData(VaultFile &vault)
+        LoginCollection parseDataBlock(const std::vector<uint8_t> &data, uint16_t entries)
         {
-            std::vector<uint8_t> data;
-            size_t offset = 0;
-            for (LoginEntry &entry : vault.data)
-            {
-                offset = writeDataMemberHelper(data, entry.domain, offset);
-                offset = writeDataMemberHelper(data, entry.user, offset);
-                offset = writeDataMemberHelper(data, entry.password, offset);
-                offset = writeDataMemberHelper(data, entry.comment, offset);
-            }
-            return data;
-        }
+            LoginCollection collection(entries);
 
-        void readDataStreamMemberHelper(std::ifstream &stream, std::string &member)
-        {
-            size_t length;
+            auto ptr = data.data();
+            for (int i = 0; i < entries; i++)
+            {
+                size_t length;
+                // Domain
+                std::memcpy(&length, ptr, sizeof(size_t));
+                collection[i].domain.resize(length);
+                ptr += sizeof(size_t);
+                std::memcpy(collection[i].domain.data(), ptr, length);
+                ptr += length;
 
-            if (!stream.read((char*)&length, sizeof(length)))
-            {
-                throw CryptedVaultException<Error>(Error::CannotReadVault, "Cannot read data block length");
+                // User
+                std::memcpy(&length, ptr, sizeof(size_t));
+                collection[i].user.resize(length);
+                ptr += sizeof(size_t);
+                std::memcpy(collection[i].user.data(), ptr, length);
+                ptr += length;
+
+                // Password
+                std::memcpy(&length, ptr, sizeof(size_t));
+                collection[i].password.resize(length);
+                ptr += sizeof(size_t);
+                std::memcpy(collection[i].password.data(), ptr, length);
+                ptr += length;
+
+                // Comment
+                std::memcpy(&length, ptr, sizeof(size_t));
+                collection[i].comment.resize(length);
+                ptr += sizeof(size_t);
+                std::memcpy(collection[i].comment.data(), ptr, length);
+                ptr += length;
             }
-            member.resize(length);
-            if (!stream.read((char*)member.data(), length))
-            {
-                throw CryptedVaultException<Error>(Error::CannotReadVault, "Cannot read data block member data");
-            }
+            
+
+            return collection;
         }
     }
 
-    VaultFile readVaultFile(const std::string &path)
+    VaultFile readVaultFile(const std::string &path, std::string_view key)
     {
         std::ifstream stream(path, std::ios::binary | std::ios::ate);
 
@@ -91,26 +103,24 @@ namespace CryptedVault::Vault
                 " and program version is " + std::to_string(vaultVersionMajor) + "." + std::to_string(vaultVersionMinor));
         }
 
-        vault.data.resize(vault.entries);
-
-        for (size_t i = 0; i < vault.entries; i++)
+        std::vector<uint8_t> bucket(size - vaultFileMinSize);
+        if (!stream.read((char*)bucket.data(), size - vaultFileMinSize))
         {
-            readDataStreamMemberHelper(stream, vault.data[i].domain);
-            readDataStreamMemberHelper(stream, vault.data[i].user);
-            readDataStreamMemberHelper(stream, vault.data[i].password);
-            readDataStreamMemberHelper(stream, vault.data[i].comment);
+            throw CryptedVaultException<Error>(Error::CannotReadVault, "Cannot read data block");
         }
 
-        std::vector<uint8_t> bucket = dumpData(vault);
         if (vault.md5 != *reinterpret_cast<__uint128_t *>(CryptoUtils::MD5(bucket).data()))
         {
             throw CryptedVaultException<Error>(Error::DataCorrupted);
         }
 
+        std::vector<uint8_t> dataDecrypted = CryptoUtils::DecryptAES256(bucket, key);
+        vault.data = parseDataBlock(dataDecrypted, vault.entries);
+
         return vault;
     }
 
-    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins)
+    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins, std::string_view key)
     {
         std::ofstream stream(path, std::ios::binary | std::ios::trunc);
 
@@ -123,7 +133,8 @@ namespace CryptedVault::Vault
             offset = writeDataMemberHelper(data, logins[i].password, offset);
             offset = writeDataMemberHelper(data, logins[i].comment, offset);
         }
-        std::vector<uint8_t> md5 = CryptoUtils::MD5(data);
+        std::vector<uint8_t> dataEncrypted = CryptoUtils::EncryptAES256(data, key);
+        std::vector<uint8_t> md5 = CryptoUtils::MD5(dataEncrypted);
 
         VaultFile vault;
         vault.magic = vaultMagicNumber;
@@ -133,7 +144,7 @@ namespace CryptedVault::Vault
         vault.entries = logins.size();
 
         stream.write(reinterpret_cast<char *>(&vault), vaultFileMinSize);
-        stream.write(reinterpret_cast<char *>(data.data()), data.size());
+        stream.write(reinterpret_cast<char *>(dataEncrypted.data()), dataEncrypted.size());
 
         stream.close();
     }

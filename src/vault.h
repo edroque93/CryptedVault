@@ -66,31 +66,6 @@ namespace CryptedVault::Vault
 
     static const uint32_t vaultFileMinSize = sizeof(VaultFile) - sizeof(VaultFile::data);
 
-    static std::ostream& operator<< (std::ostream& stream, LoginEntry entry)
-    {
-        stream << entry.domain.length() << entry.domain;
-        stream << entry.user.length() << entry.user;
-        stream << entry.password.length() << entry.password;
-        stream << entry.comment.length() << entry.comment;
-        return stream;
-    }
-
-    static std::ostream& operator<< (std::ostream& stream, VaultFile vault)
-    {
-        stream << std::hex 
-            << vaultMagicNumber
-            << vaultVersionMajor
-            << vaultVersionMinor
-            << static_cast<uint64_t>(vault.md5 >> 64)
-            << static_cast<uint64_t>(vault.md5)
-            << vault.entries;
-        for (size_t i = 0; i < vault.entries; i++)
-        {
-            stream << vault.data[i];
-        }
-        return stream;
-    }
-
-    VaultFile readVaultFile(const std::string &path);
-    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins);
+    VaultFile readVaultFile(const std::string &path, std::string_view key);
+    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins, std::string_view key);
 }
