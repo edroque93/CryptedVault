@@ -27,7 +27,21 @@ int main()
         std::cout << std::uppercase << std::hex << std::setw(2) << std::setfill('0') << (int)byteD << " ";
     std::cout << std::endl;
 
-    auto xxx = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo");
+    //auto xxx = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo");
+
+    CryptedVault::Vault::LoginCollection login 
+    { 
+        CryptedVault::Vault::LoginEntry 
+        {
+            "hotmail.com", 
+            "pepe", 
+            "1234", 
+            "meh" 
+        } 
+    };
+
+    //CryptedVault::Vault::writeVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo", login);
+    auto x = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo");
 
     return 0;
 }
