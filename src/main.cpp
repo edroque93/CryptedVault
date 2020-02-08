@@ -1,31 +1,37 @@
-#include <iostream>
-#include <iomanip>
+#include "main.h"
 
-#include "crypto.h"
-#include "vault.h"
-
-int main()
+namespace CryptedVault
 {
-    CryptedVault::Vault::LoginCollection login 
-    { 
-        CryptedVault::Vault::LoginEntry 
-        {
-            "hotmail.com", 
-            "pepe", 
-            "1234", 
-            "meh" 
-        },
-        CryptedVault::Vault::LoginEntry 
-        {
-            "gmail.com", 
-            "molaaaÄ", 
-            "asdfghijkAAäËöA@@áéññlm", 
-            "" 
-        },
-    };
+    void playground()
+    {
+        CryptedVault::Vault::LoginCollection login 
+        { 
+            CryptedVault::Vault::LoginEntry 
+            {
+                "hotmail.com", 
+                "pepe", 
+                "1234", 
+                "meh" 
+            },
+            CryptedVault::Vault::LoginEntry 
+            {
+                "gmail.com", 
+                "molaaaÄ", 
+                "asdfghijkAAäËöA@@áéññlm", 
+                "" 
+            },
+        };
 
-    CryptedVault::Vault::writeVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo", login, "mypassword");
-    auto x = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo", "mypassword");
+        CryptedVault::Vault::writeVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo", login, "mypassword");
+        auto decoded = CryptedVault::Vault::readVaultFile("/home/quique/Documents/Workspace/CryptedVault/bin/demo", "mypassword");
+    }
 
-    return 0;
+    bool CryptedVaultApp::OnInit()
+    {
+        playground();
+
+        UI::Window *frame = new UI::Window();
+        frame->Show(true);
+        return true;
+    }
 }

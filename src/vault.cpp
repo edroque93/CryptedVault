@@ -12,7 +12,7 @@ namespace CryptedVault::Vault
             size_t length = member.length();
             std::memcpy(ptr, &length, sizeof(size_t));
             ptr += sizeof(size_t);
-            std::copy(member.begin(), member.end(), ptr);
+            std::memcpy(ptr, member.data(), member.length());
             ptr += member.length();
             return (ptr - ptrBase);
         }
