@@ -28,7 +28,7 @@ namespace CryptedVault
 
     bool CryptedVaultApp::OnInit()
     {
-        playground();
+        // playground();
 
         UI::Window *frame = new UI::Window();
         frame->Show(true);

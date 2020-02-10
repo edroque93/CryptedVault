@@ -1,12 +1,41 @@
 #include "window.h"
+
 namespace CryptedVault::UI
-{
-    #define ID_Hello 1
-    
-    Window::Window() : wxFrame(NULL, wxID_ANY, "CryptedVault")
+{    
+    Window::Window() 
+        : wxFrame(
+            nullptr, 
+            wxID_ANY, 
+            "CryptedVault",
+            wxDefaultPosition,
+            wxDefaultSize,
+            wxCAPTION | wxCLOSE_BOX | wxMINIMIZE_BOX)
+    {
+        SetMinSize(wxSize(500, 200));
+        buildMenu();
+
+        mainSizer = new wxBoxSizer(wxVERTICAL);
+
+        wxBoxSizer *options = new wxBoxSizer(wxHORIZONTAL);
+        options->Add(new wxButton(this, wxID_ANY, "Add"), 0, wxALL, 10);
+        mainSizer->Add(options, 0, wxALIGN_RIGHT);
+
+        SetSizer(mainSizer);
+    }
+
+    void Window::buildRow()
+    {
+        wxBoxSizer *rowBox = new wxBoxSizer(wxHORIZONTAL);
+        
+        rowBox->Add(new wxTextCtrl(this, wxID_ANY), 1, wxEXPAND | wxALL, 10);
+
+        mainSizer->Add(rowBox, 0, wxALIGN_CENTER);
+    }
+
+    void Window::buildMenu()
     {
         wxMenu *menuFile = new wxMenu;
-        menuFile->Append(ID_Hello, "&Hello...\tCtrl-H", "Help string shown in status bar for this menu item");
+        menuFile->Append(1, "&Open...\tCtrl-O", "Open vault file");
         menuFile->AppendSeparator();
         menuFile->Append(wxID_EXIT);
         wxMenu *menuHelp = new wxMenu;
@@ -15,26 +44,35 @@ namespace CryptedVault::UI
         menuBar->Append(menuFile, "&File");
         menuBar->Append(menuHelp, "&Help");
         SetMenuBar( menuBar );
-        CreateStatusBar();
-        SetStatusText("Welcome to wxWidgets!");
-        Bind(wxEVT_MENU, &Window::OnHello, this, ID_Hello);
-        Bind(wxEVT_MENU, &Window::OnAbout, this, wxID_ABOUT);
-        Bind(wxEVT_MENU, &Window::OnExit, this, wxID_EXIT);
+
+        Bind(wxEVT_MENU, &Window::openFileCmd, this, wxID_ANY);
+        Bind(wxEVT_MENU, 
+            [](wxCommandEvent &event) { 
+                wxMessageBox("Store your passwords in a safe vault!", "About", wxOK | wxICON_INFORMATION); 
+            }, 
+            wxID_ABOUT);
+        Bind(wxEVT_MENU, [this](wxCommandEvent &event) { Close(true); }, wxID_EXIT);
     }
 
-    void Window::OnExit(wxCommandEvent& event)
+    void Window::openFileCmd(wxCommandEvent &event)
     {
-        Close(true);
-    }
+        wxFileDialog openFileDialog(this, "Open vault file", "", "", "CVF files (*.cvf)|*.cvf|Any file (*)|*", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+        if (openFileDialog.ShowModal() == wxID_CANCEL) return;
 
-    void Window::OnAbout(wxCommandEvent& event)
-    {
-        wxMessageBox("This is a wxWidgets Hello World example",
-                    "About Hello World", wxOK | wxICON_INFORMATION);
-    }
+        wxTextEntryDialog dlg(this, "Enter file password", "Password", wxEmptyString, wxTextEntryDialogStyle | wxTE_PASSWORD);
+        if (dlg.ShowModal() == wxID_CANCEL) return;
 
-    void Window::OnHello(wxCommandEvent& event)
-    {
-        wxLogMessage("Hello world from wxWidgets!");
+        try
+        {
+            logins = Vault::readVaultFile(openFileDialog.GetPath().ToStdString(), dlg.GetValue().ToStdString());
+        }
+        catch(const CryptedVaultException<CryptoUtils::Error>& e)
+        {
+            wxMessageBox("Incorrect password. Choose the correct file and try again.", "Error", wxOK | wxICON_ERROR, this);
+        }
+        catch (...)
+        {
+            wxMessageBox("Unexpected error", "Error", wxOK | wxICON_ERROR, this);
+        }
     }
 }

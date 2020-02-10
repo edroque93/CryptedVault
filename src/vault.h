@@ -66,6 +66,6 @@ namespace CryptedVault::Vault
 
     static const uint32_t vaultFileMinSize = sizeof(VaultFile) - sizeof(VaultFile::data);
 
-    VaultFile readVaultFile(const std::string &path, std::string_view key);
-    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins, std::string_view key);
+    LoginCollection readVaultFile(const std::string &path, std::string_view key);
+    void writeVaultFile(const std::string &path, LoginCollection &logins, std::string_view key);
 }

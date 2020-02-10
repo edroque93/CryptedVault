@@ -28,8 +28,8 @@ namespace CryptedVault
                 return  whatMessage.c_str();
             }
 
-            T getCode() { return code; }
-            std::string getDetails() { return details; }
+            T getCode() const { return code; }
+            std::string getDetails() const { return details; }
 
         private:
             std::string details;

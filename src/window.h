@@ -1,6 +1,8 @@
 #include <wx/wxprec.h>
 #include <wx/wx.h>
 
+#include "vault.h"
+
 namespace CryptedVault::UI
 {
     class Window : public wxFrame
@@ -8,8 +10,11 @@ namespace CryptedVault::UI
         public:
             Window();
         private:
-            void OnHello(wxCommandEvent& event);
-            void OnExit(wxCommandEvent& event);
-            void OnAbout(wxCommandEvent& event);
+            void buildMenu();
+            void buildRow();
+            void openFileCmd(wxCommandEvent &event);
+            
+            wxBoxSizer *mainSizer;
+            Vault::LoginCollection logins;
     };
 }

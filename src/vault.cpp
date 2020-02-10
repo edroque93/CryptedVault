@@ -59,7 +59,7 @@ namespace CryptedVault::Vault
         }
     }
 
-    VaultFile readVaultFile(const std::string &path, std::string_view key)
+    LoginCollection readVaultFile(const std::string &path, std::string_view key)
     {
         std::ifstream stream(path, std::ios::binary | std::ios::ate);
 
@@ -115,12 +115,11 @@ namespace CryptedVault::Vault
         }
 
         std::vector<uint8_t> dataDecrypted = CryptoUtils::DecryptAES256(bucket, key);
-        vault.data = parseDataBlock(dataDecrypted, vault.entries);
 
-        return vault;
+        return parseDataBlock(dataDecrypted, vault.entries);;
     }
 
-    void writeVaultFile(const std::string &path, std::vector<LoginEntry> &logins, std::string_view key)
+    void writeVaultFile(const std::string &path, LoginCollection &logins, std::string_view key)
     {
         std::ofstream stream(path, std::ios::binary | std::ios::trunc);
 
