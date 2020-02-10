@@ -1,5 +1,6 @@
 #include <wx/wxprec.h>
 #include <wx/wx.h>
+#include <wx/grid.h>
 
 #include "vault.h"
 
@@ -11,7 +12,8 @@ namespace CryptedVault::UI
             Window();
         private:
             void buildMenu();
-            void buildRow();
+            void generateVaultView();
+            void generateEmptyView();
             void openFileCmd(wxCommandEvent &event);
             
             wxBoxSizer *mainSizer;

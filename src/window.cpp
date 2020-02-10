@@ -9,27 +9,45 @@ namespace CryptedVault::UI
             "CryptedVault",
             wxDefaultPosition,
             wxDefaultSize,
-            wxCAPTION | wxCLOSE_BOX | wxMINIMIZE_BOX)
+            wxDEFAULT_FRAME_STYLE & ~(wxMAXIMIZE_BOX | wxRESIZE_BORDER))
     {
         SetMinSize(wxSize(500, 200));
         buildMenu();
 
         mainSizer = new wxBoxSizer(wxVERTICAL);
-
-        wxBoxSizer *options = new wxBoxSizer(wxHORIZONTAL);
-        options->Add(new wxButton(this, wxID_ANY, "Add"), 0, wxALL, 10);
-        mainSizer->Add(options, 0, wxALIGN_RIGHT);
+        
+        generateVaultView();
+        generateEmptyView();
 
         SetSizer(mainSizer);
     }
 
-    void Window::buildRow()
+    void Window::generateEmptyView()
     {
-        wxBoxSizer *rowBox = new wxBoxSizer(wxHORIZONTAL);
-        
-        rowBox->Add(new wxTextCtrl(this, wxID_ANY), 1, wxEXPAND | wxALL, 10);
+        mainSizer->Clear();
 
-        mainSizer->Add(rowBox, 0, wxALIGN_CENTER);
+        wxStaticText *text = new wxStaticText(
+            this, 
+            wxID_ANY, 
+            "Open or create a vault file!", 
+            wxDefaultPosition, 
+            wxDefaultSize, 
+            wxALIGN_CENTER);
+        text->SetFont(wxFontInfo(24));
+        mainSizer->Add(text, 0, wxALIGN_CENTER_HORIZONTAL | wxALIGN_CENTER_VERTICAL);
+    }
+
+    void Window::generateVaultView()
+    {
+        mainSizer->Clear();
+
+        wxGrid *grid = new wxGrid(this, wxID_ANY);
+        grid->CreateGrid(2, 4);
+        mainSizer->Add(grid, 0, wxALIGN_CENTER);
+
+        wxBoxSizer *options = new wxBoxSizer(wxHORIZONTAL);
+        options->Add(new wxButton(this, wxID_ANY, "Add"), 0, wxALL, 10);
+        mainSizer->Add(options, 0, wxALIGN_RIGHT);
     }
 
     void Window::buildMenu()
