@@ -13,13 +13,13 @@ namespace CryptedVault::UI
         , mainSizer(nullptr)
         , handCursorWasEnabled(false)
     {
-        SetMinSize(wxSize(550, 250));
+        SetMinSize(wxSize(700, 350));
         buildMenu();
 
         mainSizer = new wxBoxSizer(wxVERTICAL);
 
         generateVaultView();
-        generateEmptyView();
+        // generateEmptyView();
 
         Bind(wxEVT_MOTION, &Window::mouseOverFrame, this, wxID_ANY);
 
@@ -85,11 +85,29 @@ namespace CryptedVault::UI
         mainSizer->Clear(true);
 
         wxGrid *grid = new wxGrid(this, wxID_ANY);
+        grid->SetRowLabelSize(20);
         grid->CreateGrid(2, 4);
+        grid->SetMinSize(wxSize(650 + 20 + 16, 250));
+        grid->SetMargins(0 - wxSYS_VSCROLL_X, 0);
+        grid->DisableDragRowSize();
+
         mainSizer->Add(grid, 0, wxALIGN_CENTER);
 
+        grid->SetColLabelValue(0, "Domain");
+        grid->SetColLabelValue(1, "User");
+        grid->SetColLabelValue(2, "Password");
+        grid->SetColLabelValue(3, "Comment");
+        grid->SetColumnWidth(0, 150);
+        grid->SetColumnWidth(1, 150);
+        grid->SetColumnWidth(2, 150);
+        grid->SetColumnWidth(3, 200);
+
         wxBoxSizer *options = new wxBoxSizer(wxHORIZONTAL);
-        options->Add(new wxButton(this, wxID_ANY, "Add"), 0, wxALL, 10);
+        wxButton *button = new wxButton(this, wxID_ANY, "Add");
+        button->Bind(wxEVT_LEFT_DOWN, [grid](wxMouseEvent &event) { 
+            grid->AppendRows(1);
+        }, wxID_ANY);
+        options->Add(button, 0, wxALL, 10);
         mainSizer->Add(options, 0, wxALIGN_RIGHT);
     }
 
