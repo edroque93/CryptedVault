@@ -44,7 +44,9 @@ namespace CryptedVault::UI
         text1->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent &event) { OpenVaultFile(); }, wxID_ANY);
         text3->Bind(wxEVT_LEFT_DOWN, [this](wxMouseEvent &event) { CreateVaultFile(); }, wxID_ANY);
         text1->Bind(wxEVT_MOTION, &Window::mouseOverLabels, this, wxID_ANY);
+        text2->Bind(wxEVT_MOTION, &Window::mouseOverFrame, this, wxID_ANY);
         text3->Bind(wxEVT_MOTION, &Window::mouseOverLabels, this, wxID_ANY);
+        text4->Bind(wxEVT_MOTION, &Window::mouseOverFrame, this, wxID_ANY);
 
         textSizer->Add(text1, 0, 0);
         textSizer->Add(text2, 0, 0);
@@ -84,28 +86,28 @@ namespace CryptedVault::UI
     {
         mainSizer->Clear(true);
 
-        wxGrid *grid = new wxGrid(this, wxID_ANY);
-        grid->SetRowLabelSize(20);
-        grid->CreateGrid(2, 4);
-        grid->SetMinSize(wxSize(650 + 20 + 16, 250));
-        grid->SetMargins(0 - wxSYS_VSCROLL_X, 0);
-        grid->DisableDragRowSize();
+        wxScrolledWindow *scrolledWindow = new wxScrolledWindow(this);
+        scrolledWindow->SetScrollbars(10, 10, 10, 10);
+        scrolledWindow->ShowScrollbars(wxScrollbarVisibility::wxSHOW_SB_NEVER, wxScrollbarVisibility::wxSHOW_SB_DEFAULT);
 
-        mainSizer->Add(grid, 0, wxALIGN_CENTER);
+        wxBoxSizer *customGrid = new wxBoxSizer(wxVERTICAL);
+        scrolledWindow->SetSizer(customGrid);
 
-        grid->SetColLabelValue(0, "Domain");
-        grid->SetColLabelValue(1, "User");
-        grid->SetColLabelValue(2, "Password");
-        grid->SetColLabelValue(3, "Comment");
-        grid->SetColumnWidth(0, 150);
-        grid->SetColumnWidth(1, 150);
-        grid->SetColumnWidth(2, 150);
-        grid->SetColumnWidth(3, 200);
+        mainSizer->Add(scrolledWindow, 1, wxALL | wxGROW);
+
+        for (int  i = 0; i < 2; i++)
+        {
+            wxButton *b = new wxButton(scrolledWindow, wxID_ANY, "Hey!");
+            customGrid->Add(b, 0, wxALL, 10);
+        }
 
         wxBoxSizer *options = new wxBoxSizer(wxHORIZONTAL);
         wxButton *button = new wxButton(this, wxID_ANY, "Add");
-        button->Bind(wxEVT_LEFT_DOWN, [grid](wxMouseEvent &event) { 
-            grid->AppendRows(1);
+        button->Bind(wxEVT_LEFT_DOWN, [this, scrolledWindow, customGrid](wxMouseEvent &event) { 
+            auto sizer = scrolledWindow->GetSizer();
+            wxButton *b = new wxButton(scrolledWindow, wxID_ANY, "Hey!");
+            sizer->Add(b, 0, wxALL, 10);
+            scrolledWindow->FitInside();
         }, wxID_ANY);
         options->Add(button, 0, wxALL, 10);
         mainSizer->Add(options, 0, wxALIGN_RIGHT);

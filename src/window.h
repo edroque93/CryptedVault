@@ -24,8 +24,8 @@ namespace CryptedVault::UI
 
             std::string currentVaultPath;
             std::string currentVaultPassword;
-            wxBoxSizer *mainSizer;
             Vault::LoginCollection logins;
+            wxBoxSizer *mainSizer;
             bool handCursorWasEnabled;
     };
 }
