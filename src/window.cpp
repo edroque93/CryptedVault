@@ -171,10 +171,10 @@ namespace CryptedVault::UI
 
         removeButton->SetBitmap(wxArtProvider::GetBitmap(wxART_DELETE));
 
-        textDomain->SetValue(domain);
-        textUser->SetValue(user);
-        textPassword->SetValue(password);
-        textComment->SetValue(comment);
+        textDomain->SetValue(wxString::FromUTF8(domain.c_str()));
+        textUser->SetValue(wxString::FromUTF8(user.c_str()));
+        textPassword->SetValue(wxString::FromUTF8(password.c_str()));
+        textComment->SetValue(wxString::FromUTF8(comment.c_str()));
 
         entrySizer->Add(5, -1);
         entrySizer->Add(textDomain, 0, wxALL, 5);
@@ -254,6 +254,14 @@ namespace CryptedVault::UI
         try
         {
             logins = Vault::readVaultFile(currentVaultPath, currentVaultPassword);
+
+            generateVaultView();
+            for (auto &&login : logins)
+            {
+                addEntry(login.domain, login.user, login.password, login.comment);
+            }
+            
+
         }
         catch(const CryptedVaultException<CryptoUtils::Error>& e)
         {
