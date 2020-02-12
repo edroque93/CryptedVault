@@ -1,8 +1,10 @@
 #include <wx/wxprec.h>
 #include <wx/wx.h>
-#include <wx/grid.h>
 #include <wx/stattext.h>
-#include <wx/hyperlink.h>
+#include <wx/artprov.h>
+#include <chrono>
+#include <string>
+#include <algorithm>
 
 #include "vault.h"
 
@@ -16,16 +18,30 @@ namespace CryptedVault::UI
             void buildMenu();
             void generateVaultView();
             void generateEmptyView();
-            void OpenVaultFile();
-            void CreateVaultFile();
+            void openVaultFile();
+            void createVaultFile();
+            wxBoxSizer *buildHeader();
             void testEvent(wxMouseEvent &event);
             void mouseOverLabels(wxMouseEvent &event);
             void mouseOverFrame(wxMouseEvent &event);
+            void setReadOnly(bool value, bool setUI = true);
+            void addEntry(std::string domain, std::string user, std::string password, std::string comment);
 
             std::string currentVaultPath;
             std::string currentVaultPassword;
-            wxBoxSizer *mainSizer;
             Vault::LoginCollection logins;
+            std::vector<wxBoxSizer *> uiEntries;
+            wxBoxSizer *mainSizer;
+            wxScrolledWindow *scrolledWindow;
+            wxCheckBox *readOnly;
             bool handCursorWasEnabled;
+
+            enum ctrlID {
+                ID_DOMAIN = 0x1000,
+                ID_USER,
+                ID_PASSWORD,
+                ID_COMMENT,
+            };
     };
+    
 }
