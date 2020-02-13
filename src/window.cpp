@@ -134,6 +134,7 @@ namespace CryptedVault::UI
 
     void Window::addEntry(std::string domain, std::string user, std::string password, std::string comment)
     {
+        // TODO all these checks should be gone and guaranteed by a nice work flow...
         if (scrolledWindow == nullptr) return;
         if (readOnly == nullptr) return;
 
@@ -144,8 +145,11 @@ namespace CryptedVault::UI
         wxTextCtrl *textUser = new wxTextCtrl(scrolledWindow, ctrlID::ID_USER);
         wxTextCtrl *textPassword = new wxTextCtrl(scrolledWindow, ctrlID::ID_PASSWORD);
         wxTextCtrl *textComment = new wxTextCtrl(scrolledWindow, ctrlID::ID_COMMENT);
+
+        uiEntryData uiEntry{textDomain, textUser, textPassword, textComment};
+
         wxButton *removeButton = new wxButton(scrolledWindow, wxID_ANY);
-        removeButton->Bind(wxEVT_LEFT_DOWN, [this, entrySizer, sizerOfScrolledWindow, textDomain](wxMouseEvent &event) {
+        removeButton->Bind(wxEVT_LEFT_DOWN, [this, entrySizer, sizerOfScrolledWindow, textDomain, uiEntry](wxMouseEvent &event) {
             if (wxMessageDialog(
                     this, 
                     "Are you sure you want to delete the entry for \"" + textDomain->GetValue().ToStdString() + "\"?",
@@ -156,7 +160,7 @@ namespace CryptedVault::UI
                 return;
             }
 
-            uiEntries.erase(std::remove(uiEntries.begin(), uiEntries.end(), entrySizer));
+            uiEntries.erase(std::remove(uiEntries.begin(), uiEntries.end(), uiEntry));
             sizerOfScrolledWindow->Hide(entrySizer);
             sizerOfScrolledWindow->Layout();
             scrolledWindow->Layout();
@@ -183,7 +187,7 @@ namespace CryptedVault::UI
         entrySizer->Add(textComment, 0, wxALL, 5);
         entrySizer->Add(removeButton, 0, wxALL, 5);
 
-        uiEntries.push_back(entrySizer);
+        uiEntries.push_back(uiEntry);
         sizerOfScrolledWindow->Add(entrySizer, 0, wxALL);
         scrolledWindow->FitInside();
         scrolledWindow->Scroll(wxPoint(entrySizer->GetPosition().x, entrySizer->GetPosition().y));
@@ -222,6 +226,7 @@ namespace CryptedVault::UI
         wxMenu *menuFile = new wxMenu;
         menuFile->Append(wxID_NEW, "&New...\tCtrl-N", "New vault file");
         menuFile->Append(wxID_OPEN, "&Open...\tCtrl-O", "Open vault file");
+        menuFile->Append(wxID_SAVE, "&Save...\tCtrl-S", "Save vault file");
         menuFile->AppendSeparator();
         menuFile->Append(wxID_EXIT);
         wxMenu *menuHelp = new wxMenu;
@@ -238,6 +243,7 @@ namespace CryptedVault::UI
                 wxMessageBox("Store your passwords in a safe vault!", "About", wxOK | wxICON_INFORMATION); 
             }, 
             wxID_ABOUT);
+        Bind(wxEVT_MENU, [this](wxCommandEvent &event) { saveVaultFile(); }, wxID_SAVE);
         Bind(wxEVT_MENU, [this](wxCommandEvent &event) { Close(true); }, wxID_EXIT);
     }
 
@@ -260,8 +266,6 @@ namespace CryptedVault::UI
             {
                 addEntry(login.domain, login.user, login.password, login.comment);
             }
-            
-
         }
         catch(const CryptedVaultException<CryptoUtils::Error>& e)
         {
@@ -292,5 +296,30 @@ namespace CryptedVault::UI
         }
 
         generateVaultView();
+    }
+
+    void Window::saveVaultFile()
+    {
+        Vault::LoginCollection collection;
+        for (auto &child : uiEntries)
+        {
+            auto wxDomain = child.domain->GetValue();
+            auto wxUser = child.user->GetValue();
+            auto wxPassword = child.password->GetValue();
+            auto wxComment = child.comment->GetValue();
+
+            auto domain = wxDomain.ToUTF8();
+            auto user = wxUser.ToUTF8();
+            auto password = wxPassword.ToUTF8();
+            auto comment = wxComment.ToUTF8();
+
+            collection.push_back(Vault::LoginEntry {
+                std::string(domain.data(), domain.length()), 
+                std::string(user.data(), user.length()), 
+                std::string(password.data(), password.length()), 
+                std::string(comment.data(), comment.length()), 
+            });
+        }
+        Vault::writeVaultFile(currentVaultPath, collection, currentVaultPassword);
     }
 }
