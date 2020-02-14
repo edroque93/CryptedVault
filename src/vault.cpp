@@ -95,12 +95,12 @@ namespace CryptedVault::Vault
             throw CryptedVaultException<Error>(Error::WrongFile);
         }
 
-        if (vault.versionMajor != vaultVersionMajor || vault.versionMinor != vaultVersionMinor)
+        if (vault.version != vaultVersion)
         {
             throw CryptedVaultException<Error>(
                 Error::WrongVersion, 
-                "File version is " + std::to_string(vault.versionMajor) + "." + std::to_string(vault.versionMinor) +
-                " and program version is " + std::to_string(vaultVersionMajor) + "." + std::to_string(vaultVersionMinor));
+                "Vault file version is " + std::to_string(vault.version) + 
+                " and program version is " + std::to_string(vaultVersion));
         }
 
         std::vector<uint8_t> bucket(size - vaultFileMinSize);
@@ -137,8 +137,7 @@ namespace CryptedVault::Vault
 
         VaultFile vault;
         vault.magic = vaultMagicNumber;
-        vault.versionMajor = vaultVersionMajor;
-        vault.versionMinor = vault.versionMinor;
+        vault.version = vaultVersion;
         vault.md5 = *reinterpret_cast<__int128_t *>(md5.data());
         vault.entries = logins.size();
 

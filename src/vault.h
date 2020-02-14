@@ -37,8 +37,7 @@ namespace CryptedVault::Vault
     }
 
     static const uint32_t vaultMagicNumber = 0xCA9320FE;
-    static const uint16_t vaultVersionMajor = 0x0001;
-    static const uint16_t vaultVersionMinor = 0x0000;
+    static const uint16_t vaultVersion = 0x0002;
     
     struct LoginEntry
     {
@@ -55,8 +54,7 @@ namespace CryptedVault::Vault
     struct VaultFile
     {
         uint32_t magic;
-        uint16_t versionMajor;
-        uint16_t versionMinor;
+        uint16_t version;
         __uint128_t md5;
         uint16_t entries;
         std::vector<LoginEntry> data;

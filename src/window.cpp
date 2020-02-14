@@ -271,6 +271,10 @@ namespace CryptedVault::UI
         {
             wxMessageBox("Incorrect password. Choose the correct file and try again.", "Error", wxOK | wxICON_ERROR, this);
         }
+        catch(const CryptedVaultException<Vault::Error>& e)
+        {
+            wxMessageBox("The selected file is not valid: " + e.getDetails(), "Error", wxOK | wxICON_ERROR, this);
+        }
         catch (...)
         {
             wxMessageBox("Unexpected error", "Error", wxOK | wxICON_ERROR, this);
@@ -285,6 +289,8 @@ namespace CryptedVault::UI
         currentVaultPath = saveFileDialog.GetPath().ToStdString();
 
         wxTextEntryDialog passwordInputDialog(this, "Enter file password", "Password", wxEmptyString, wxTextEntryDialogStyle | wxTE_PASSWORD);
+        currentVaultPassword = "";
+
         while (currentVaultPassword == "")
         {
             if (passwordInputDialog.ShowModal() == wxID_CANCEL) return;
